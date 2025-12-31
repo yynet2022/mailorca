@@ -1,0 +1,15 @@
+{
+  "smtp": {
+    "host": "127.0.0.1",
+    "port": 1025
+  },
+  "http": {
+    "host": "127.0.0.1",
+    "port": 8025
+  },
+  "max_history": 100,
+  "ui": {
+    "list_columns": ["Date", "Subject", "To", "From"],
+    "detail_headers": ["From", "To", "Cc", "Subject", "Date", "Message-ID", "X-Mailer"]
+  }
+}

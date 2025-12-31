@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Inbox ({{ mails|length }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" style="table-layout: fixed;">
+                        <thead class="table-light">
+                            <tr>
+                                {% for col in columns %}
+                                <th>{{ col }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mail in mails %}
+                            <tr class="mail-row" onclick="window.location.href='/mail/{{ mail.id }}'">
+                                {% for col in columns %}
+                                <td class="text-truncate" style="max-width: 200px;">
+                                    {{ mail.parsed.headers.get(col, '') }}        
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="{{ columns|length }}" class="text-center py-4 text-muted">
+                                    No mails received yet. Listening on port {{ smtp_port }}...
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>        </table>
+    </div>
+</div>
+{% endblock %}
