@@ -1,15 +1,15 @@
+# -*- coding:utf-8 -*-
+#
 import re
 import html
-# import asyncio
-import json
 import uuid
 import time
 import email
 import logging
-import logging.config
-from email.header import decode_header, make_header
 from email import policy
+from email.header import decode_header, make_header
 from typing import List, Dict, Optional, Any
+# import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
@@ -17,60 +17,13 @@ from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.templating import Jinja2Templates
 from aiosmtpd.controller import Controller as SMTPController
 
-# --- Configuration Loading ---
-CONFIG_FILE = "config.json"
-DEFAULT_CONFIG = {
-    "smtp": {"host": "127.0.0.1", "port": 1025},
-    "http": {"host": "127.0.0.1", "port": 8025},
-    "max_history": 100,
-    "ui": {
-        "list_columns": ["Date", "Subject", "To", "From"],
-        "detail_headers": ["From", "To", "Cc", "Subject", "Date"]
-    },
-    "logging": {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'simple': {
-                'format': '%(asctime)s %(name)s:%(lineno)s %(funcName)s:%(levelname)s: %(message)s'  # noqa: E501
-            }
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'simple',
-            },
-        },
-        'root': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-        },
-        'loggers': {
-            'mailorca': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-        },
-    }
-}
+from config import CONFIG
 
 
-def load_config():
-    try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            user_config = json.load(f)
-            # Merge with defaults (simplified shallow merge for top keys)
-            config = DEFAULT_CONFIG.copy()
-            config.update(user_config)
-            return config
-    except FileNotFoundError:
-        print("Config file not found. Using defaults.")
-        return DEFAULT_CONFIG
+TITLE = "MailOrca"
 
-
-CONFIG = load_config()
-logging.config.dictConfig(CONFIG['logging'])
 logger = logging.getLogger(__name__)
+logger.info(f'{TITLE} start')
 
 
 # --- In-Memory Data Store ---
@@ -221,7 +174,7 @@ async def lifespan(app: FastAPI):
     logger.info("SMTP stopped.")
 
 
-app = FastAPI(title="MailOrca", lifespan=lifespan)
+app = FastAPI(title=TITLE, lifespan=lifespan)
 
 # --- Routes ---
 
@@ -283,20 +236,3 @@ async def api_detail(mail_id: str):
     c = mail.copy()
     c.pop("raw", None)  # Remove raw bytes
     return JSONResponse(c)
-
-
-def main():
-    try:
-        import uvicorn
-        uvicorn.run(
-            "mailorca:app",
-            host=CONFIG["http"]["host"],
-            port=CONFIG["http"]["port"],
-            reload=False
-        )
-    except Exception as e:
-        logger.error(f'Error: {e}')
-
-
-if __name__ == "__main__":
-    main()
