@@ -5,8 +5,9 @@ a function to load settings from an external JSON file.
 """
 
 import json
+from typing import Any
 
-CONFIG = {
+CONFIG: dict[str, Any] = {
     "smtp": {"host": "127.0.0.1", "port": 1025},
     "http": {"host": "127.0.0.1", "port": 8025},
     "max_history": 100,

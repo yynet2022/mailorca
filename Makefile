@@ -6,6 +6,9 @@ all:
 
 check:
 	flake8 *.py src/
+	isort --diff *.py src/
+	black --diff *.py src/
+	mypy runserver.py
 
 test:
 

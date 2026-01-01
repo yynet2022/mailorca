@@ -52,3 +52,10 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.mypy]
+python_version = "3.9"
+mypy_path = "src"
+ignore_missing_imports = true
+check_untyped_defs = true
+color_output = false
