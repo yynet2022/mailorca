@@ -7,7 +7,7 @@ CONFIG = {
     "max_history": 100,
     "ui": {
         "list_columns": ["Date", "Subject", "To", "From"],
-        "detail_headers": ["From", "To", "Cc", "Subject", "Date"]
+        "detail_headers": ["From", "To", "Cc", "Subject", "Date", "Message-ID"]
     },
     "logging": {
         'version': 1,

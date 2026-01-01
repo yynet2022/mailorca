@@ -54,6 +54,9 @@ CONFIG_FILE = "config.json"
     show_default=True,
 )
 @click.option(
+    "--reload", is_flag=True, default=False,
+    help="Enable auto-reload.", show_default=True)
+@click.option(
     "--verbose", "-v", type=int,
     default=0,
     help="Set the verbosity level (0: warning, 1: info, 2: debug).",
@@ -61,7 +64,7 @@ CONFIG_FILE = "config.json"
 )
 @click.pass_context
 def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history,
-         verbose):
+         reload, verbose):
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -100,7 +103,7 @@ def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history,
             "mailorca.web:app",
             host=CONFIG["http"]["host"],
             port=CONFIG["http"]["port"],
-            reload=False
+            reload=reload
         )
     except Exception as e:
         logger.error(f'Error: {e}')

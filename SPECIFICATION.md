@@ -18,7 +18,7 @@ MailHogの軽量代替を目指し、Python単体で動作すること、設定�
 ### インストールコマンド
 
 ```bash
-pip install fastapi uvicorn[standard] aiosmtpd jinja2 python-multipart
+pip install fastapi uvicorn[standard] aiosmtpd jinja2 python-multipart click
 ```
 
 ## 3. 設定ファイル仕様 (`config.json`)
@@ -38,13 +38,13 @@ pip install fastapi uvicorn[standard] aiosmtpd jinja2 python-multipart
   "max_history": 100,
   "ui": {
     "list_columns": ["Date", "Subject", "To", "From"],
-    "detail_headers": ["From", "To", "Cc", "Subject", "Date", "Message-ID", "X-Mailer"]
+    "detail_headers": ["From", "To", "Cc", "Subject", "Date", "Message-ID"]
   },
   "logging": {
     "version": 1,
     "root": { "level": "WARNING" },
     "loggers": {
-      "mailorca": { "level": "DEBUG" }
+      "mailorca": { "level": "WARNING" }
     }
   }
 }
@@ -94,61 +94,51 @@ pip install fastapi uvicorn[standard] aiosmtpd jinja2 python-multipart
 * 設定されたホストとポート（デフォルト: 1025）でSMTP接続を待機する。
 * 認証（Auth）は行わず、全てのメールを受け入れる。
 * **受信処理フロー**:
-1. データ受信。
-2. `email` ライブラリを用いてパースする。
+    1. SMTP プロトコルによるデータ受信 (`MailHandler`)。
+    2. 受信した生データ (`bytes`) をデータストア (`STORE.add`) へ渡す。
+
+### 5.2 データ管理とパース機能 (Store)
+
+受信したメールデータは以下のステップでメモリ上に保存される。
+
+1. **データ登録**: UUID の生成、受信時刻の記録、生データの保持。
+2. **パース処理**: `email` ライブラリを用いて生データを解析。
 3. **ヘッダ解析**:
-* MIMEエンコード（`=?utf-8?b?...?=` 等）されているヘッダはデコードして文字列化する。
-* 同じヘッダ名が複数回登場した場合（`Received` 等）、リストとして値を保持する。
-* 1回のみの場合は文字列として保持する。
-
-
+    * MIMEエンコード（`=?utf-8?b?...?=` 等）されているヘッダはデコードして文字列化する。
+    * 同じヘッダ名が複数回登場した場合（`Received` 等）、リストとして値を保持する。
+    * 1回のみの場合は文字列として保持する。
 4. **本文解析**:
-* マルチパート構造を走査する。
-* `text/plain` パートを抽出し、charsetに基づいてデコードして `body_text` に格納。
-* `text/html` パートを抽出し、同様に `body_html` に格納。
+    * マルチパート構造を走査する。
+    * `text/plain` パートを抽出し、charsetに基づいてデコードして `body_text` に格納。
+    * `text/html` パートを抽出し、同様に `body_html` に格納。
+5. **履歴管理**: 保存件数が `max_history` を超えている場合、最も古いデータを削除する。
 
-
-5. 生データ(`raw`)と共にメモリ上のリストに追加する。
-6. `max_history` を超えている場合、最も古いデータを削除する。
-
-
-
-### 5.2 HTTP サーバー (Web UI) 機能
+### 5.3 HTTP サーバー (Web UI) 機能
 
 #### A. メール一覧ページ (`GET /`)
 
 * 保存されているメールを時系列（新しい順）でテーブル表示する。
 * **動的カラム生成**:
-* `config.json` の `ui.list_columns` に設定されたヘッダ名を列として表示する。
-* 各メールの `parsed['headers']` から該当する値を参照する。
-
-
+    * `config.json` の `ui.list_columns` に設定されたヘッダ名を列として表示する。
+    * 各メールの `parsed['headers']` から該当する値を参照する。
 * **行クリック遷移**:
-* テーブルの各行をクリックすることで、詳細ページ (`/mail/{id}`) へ遷移する。
-
-
+    * テーブルの各行をクリックすることで、詳細ページ (`/mail/{id}`) へ遷移する。
 * **非表示**: 内部管理用IDは画面には表示しない。
 
 #### B. メール詳細ページ (`GET /mail/{id}`)
 
 * **ヘッダ情報エリア**:
-* `config.json` の `ui.detail_headers` に定義された順序でヘッダを表示する。
-* データが存在しない項目は「(empty)」と表示するか、グレーアウト表示する。
-* 値がリスト（`Received` 等）の場合、改行して全て表示する。
-
-
+    * `config.json` の `ui.detail_headers` に定義された順序でヘッダを表示する。
+    * データが存在しない項目は「(empty)」と表示するか、グレーアウト表示する。
+    * 値がリスト（`Received` 等）の場合、改行して全て表示する。
 * **本文表示エリア**:
-* **タブ切り替え UI**: `[HTML]` タブと `[Plain Text]` タブを配置。
-* HTMLが存在する場合、デフォルトでHTMLタブを表示。
-* Plain Textのみの場合、Textタブのみ有効化。
-* **HTML表示**: CSS汚染を防ぐため、`<iframe>` 内にHTMLソースを流し込む（`srcdoc` 利用など）。
-* **Text表示**: `<pre>` タグ等で整形済みテキストとして表示。
-
-
+    * **タブ切り替え UI**: `[HTML]` タブと `[Plain Text]` タブを配置。
+    * HTMLが存在する場合、デフォルトでHTMLタブを表示。
+    * Plain Textのみの場合、Textタブのみ有効化。
+    * **HTML表示**: CSS汚染を防ぐため、`<iframe>` 内にHTMLソースを流し込む（`srcdoc` 利用）。
+    * **Text表示**: `<pre>` タグで表示。**本文内のURLは自動的にリンク（`<a>`タグ）に変換される。**
 * **生データダウンロード**:
-* 「Download .eml」ボタンを配置。`raw` データをファイルとしてダウンロードさせる。
-
-
+    * 「Download .eml」ボタンを配置。`raw` データをファイルとしてダウンロードさせる。
 
 #### C. API エンドポイント
 

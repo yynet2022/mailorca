@@ -39,6 +39,26 @@ Django や Flask などの Web アプリケーション開発時に、ローカ�
 python runserver.py
 ```
 
+コマンドライン引数や環境変数で設定を上書きすることも可能です。
+
+```bash
+# ヘルプを表示
+python runserver.py --help
+
+# ポート番号を変更して起動する例
+python runserver.py --smtp-port 2025 --http-port 8080
+
+# 詳細なログを出力して起動 (-v 1: INFO, -v 2: DEBUG)
+python runserver.py -v 2
+```
+
+#### 環境変数による設定
+
+引数の代わりに環境変数で設定することも可能です（プレフィックス `MAILORCA_` を使用）。
+
+*   `MAILORCA_SMTP_PORT=2025`
+*   `MAILORCA_HTTP_PORT=8080`
+
 デフォルトでは以下のポートで待機します。
 
 *   **SMTP Server**: `127.0.0.1:1025`
