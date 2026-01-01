@@ -5,6 +5,7 @@ import os
 import logging
 import logging.config
 import click
+import asyncio
 
 # Add src to sys.path to allow running without installation
 sys.path.insert(
@@ -61,6 +62,9 @@ CONFIG_FILE = "config.json"
 @click.pass_context
 def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history,
          verbose):
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     load_config(config)
 
     if verbose > 1:
