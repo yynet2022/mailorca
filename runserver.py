@@ -19,45 +19,60 @@ CONFIG_FILE = "config.json"
 @click.option(
     "--config", type=click.Path(),
     default=CONFIG_FILE,
-    help="config-file",
+    help="Path to the JSON configuration file.",
     show_default=True,
 )
 @click.option(
     "--smtp-host", type=str,
     default=CONFIG['smtp']['host'],
-    help="SMTP host",
+    help="The hostname or IP address to bind the SMTP server to.",
     show_default=True,
 )
 @click.option(
     "--smtp-port", type=int,
     default=CONFIG['smtp']['port'],
-    help="SMTP port",
+    help="The port number to listen on for SMTP connections.",
     show_default=True,
 )
 @click.option(
     "--http-host", type=str,
     default=CONFIG['http']['host'],
-    help="HTTP host",
+    help="The hostname or IP address to bind the Web UI server to.",
     show_default=True,
 )
 @click.option(
     "--http-port", type=int,
     default=CONFIG['http']['port'],
-    help="HTTP port",
+    help="The port number to listen on for HTTP requests.",
     show_default=True,
 )
 @click.option(
     "--max-history", type=int,
     default=CONFIG['max_history'],
-    help="max-history",
+    help="The maximum number of emails to keep in memory.",
+    show_default=True,
+)
+@click.option(
+    "--verbose", "-v", type=int,
+    default=0,
+    help="Set the verbosity level (0: warning, 1: info, 2: debug).",
     show_default=True,
 )
 @click.pass_context
-def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history):
+def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history,
+         verbose):
     load_config(config)
 
+    if verbose > 1:
+        CONFIG['logging']['loggers']['mailorca']['level'] = "DEBUG"
+    elif verbose > 0:
+        CONFIG['logging']['loggers']['mailorca']['level'] = "INFO"
+    if verbose > 11:
+        CONFIG['logging']['root']['level'] = "DEBUG"
+    elif verbose > 10:
+        CONFIG['logging']['root']['level'] = "INFO"
     logging.config.dictConfig(CONFIG['logging'])
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("mailorca")
 
     p = click.core.ParameterSource
     if ctx.get_parameter_source('smtp_host') != p.DEFAULT:

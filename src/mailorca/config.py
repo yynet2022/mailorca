@@ -29,7 +29,7 @@ CONFIG = {
         },
         'loggers': {
             'mailorca': {
-                'level': 'DEBUG',
+                'level': 'WARNING',
                 'propagate': True,
             },
         },
