@@ -36,7 +36,7 @@ Django や Flask などの Web アプリケーション開発時に、ローカ�
 以下のコマンドでサーバーを起動します。
 
 ```bash
-python mailorca.py
+python runserver.py
 ```
 
 デフォルトでは以下のポートで待機します。

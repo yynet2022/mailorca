@@ -1,10 +1,16 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
-#
-import click
+import sys
+import os
 import logging
 import logging.config
-from config import CONFIG, load_config
+import click
+
+# Add src to sys.path to allow running without installation
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+
+from mailorca.config import CONFIG, load_config  # noqa: E402
 
 CONFIG_FILE = "config.json"
 
@@ -53,9 +59,6 @@ def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history):
     logging.config.dictConfig(CONFIG['logging'])
     logger = logging.getLogger(__name__)
 
-    # check:
-    #   ctx.get_parameter_source('val') vs
-    #   click.core.ParameterSource.{DEFAULT, COMMANDLINE, ENVIRONMENT}
     p = click.core.ParameterSource
     if ctx.get_parameter_source('smtp_host') != p.DEFAULT:
         CONFIG['smtp']['host'] = smtp_host
@@ -70,8 +73,12 @@ def main(ctx, config, smtp_host, smtp_port, http_host, http_port, max_history):
 
     try:
         import uvicorn
+        # Note: reload=True works best when the package is installed
+        # in editable mode (pip install -e .). If not installed,
+        # uvicorn might not detect changes in src/mailorca correctly
+        # unless pythonpath is set explicitly.
         uvicorn.run(
-            "mailorca:app",
+            "mailorca.web:app",
             host=CONFIG["http"]["host"],
             port=CONFIG["http"]["port"],
             reload=False
