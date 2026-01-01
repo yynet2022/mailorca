@@ -1,18 +1,18 @@
 # -*- coding:utf-8 -*-
+import html
 import logging
 import re
-import html
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, Response, JSONResponse
-from fastapi.templating import Jinja2Templates
 from aiosmtpd.controller import Controller as SMTPController
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.templating import Jinja2Templates
 
 from .config import CONFIG
-from .store import STORE
 from .smtp import MailHandler
+from .store import STORE
 
 TITLE = "MailOrca"
 logger = logging.getLogger(__name__)
@@ -31,11 +31,12 @@ def urlize_text(text: str) -> str:
     # Escape HTML first to prevent XSS from original text
     escaped_text = html.escape(text)
     # Simple regex for URLs
-    url_pattern = re.compile(r'(https?://[^\s]+)')
+    url_pattern = re.compile(r"(https?://[^\s]+)")
     # Replace URL with <a> tag
     return url_pattern.sub(
         r'<a href="\1" target="_blank" rel="noopener noreferrer">\1</a>',
-        escaped_text)
+        escaped_text,
+    )
 
 
 templates.env.filters["urlize"] = urlize_text
@@ -47,7 +48,7 @@ async def lifespan(app: FastAPI):
     controller = SMTPController(
         MailHandler(),
         hostname=CONFIG["smtp"]["host"],
-        port=CONFIG["smtp"]["port"]
+        port=CONFIG["smtp"]["port"],
     )
     controller.start()
     logger.info(
@@ -71,12 +72,15 @@ app = FastAPI(title=TITLE, lifespan=lifespan)
 # --- Routes ---
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("list.html", {
-        "request": request,
-        "mails": STORE.mails,
-        "columns": CONFIG["ui"]["list_columns"],
-        "smtp_port": CONFIG["smtp"]["port"]
-    })
+    return templates.TemplateResponse(
+        "list.html",
+        {
+            "request": request,
+            "mails": STORE.mails,
+            "columns": CONFIG["ui"]["list_columns"],
+            "smtp_port": CONFIG["smtp"]["port"],
+        },
+    )
 
 
 @app.get("/mail/{mail_id}", response_class=HTMLResponse)
@@ -85,11 +89,14 @@ async def detail(request: Request, mail_id: str):
     if not mail:
         raise HTTPException(status_code=404, detail="Mail not found")
 
-    return templates.TemplateResponse("detail.html", {
-        "request": request,
-        "mail": mail,
-        "detail_headers": CONFIG["ui"]["detail_headers"]
-    })
+    return templates.TemplateResponse(
+        "detail.html",
+        {
+            "request": request,
+            "mail": mail,
+            "detail_headers": CONFIG["ui"]["detail_headers"],
+        },
+    )
 
 
 @app.get("/mail/{mail_id}/download")
@@ -103,7 +110,7 @@ async def download_raw(mail_id: str):
     return Response(
         content=mail["raw"],
         media_type="message/rfc822",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 

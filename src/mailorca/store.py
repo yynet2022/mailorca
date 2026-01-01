@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
+import email
 import time
 import uuid
-import email
 from email import policy
 from email.header import decode_header, make_header
-from typing import List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from .config import CONFIG
 
@@ -26,14 +26,14 @@ class MailStore:
             "id": mail_id,
             "timestamp": timestamp,
             "raw": raw_data,
-            "parsed": parsed
+            "parsed": parsed,
         }
 
         self.mails.insert(0, entry)  # Prepend (Newest first)
 
         # Trim history
         if len(self.mails) > self.max_history:
-            self.mails = self.mails[:self.max_history]
+            self.mails = self.mails[: self.max_history]
 
     def get(self, mail_id: str) -> Optional[Dict]:
         for m in self.mails:
@@ -77,11 +77,11 @@ class MailStore:
             content_type = part.get_content_type()
             payload = part.get_payload(decode=True)
             if payload:
-                charset = part.get_content_charset() or 'utf-8'
+                charset = part.get_content_charset() or "utf-8"
                 try:
-                    text = payload.decode(charset, errors='replace')
+                    text = payload.decode(charset, errors="replace")
                 except LookupError:
-                    text = payload.decode('utf-8', errors='replace')
+                    text = payload.decode("utf-8", errors="replace")
 
                 if content_type == "text/plain" and body_text is None:
                     body_text = text
@@ -97,7 +97,7 @@ class MailStore:
         return {
             "headers": headers,
             "body_text": body_text,
-            "body_html": body_html
+            "body_html": body_html,
         }
 
 
