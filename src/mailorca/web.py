@@ -2,6 +2,7 @@
 import html
 import logging
 import re
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -25,7 +26,14 @@ templates = Jinja2Templates(directory=str(templates_dir))
 
 # --- Helpers ---
 def urlize_text(text: str) -> str:
-    """Convert URLs in text to clickable links."""
+    """Convert URLs in text to clickable links.
+
+    Args:
+        text: The text to process.
+
+    Returns:
+        The text with URLs wrapped in anchor tags.
+    """
     if not text:
         return ""
     # Escape HTML first to prevent XSS from original text
@@ -43,7 +51,12 @@ templates.env.filters["urlize"] = urlize_text
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Manage the lifecycle of the application (startup/shutdown).
+
+    Starts the SMTP server in a background thread on startup and
+    stops it on shutdown.
+    """
     # Startup: Run SMTP Server
     controller = SMTPController(
         MailHandler(),
@@ -71,7 +84,8 @@ app = FastAPI(title=TITLE, lifespan=lifespan)
 
 # --- Routes ---
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request) -> Response:
+    """Render the main page listing received emails."""
     return templates.TemplateResponse(
         "list.html",
         {
@@ -84,7 +98,8 @@ async def index(request: Request):
 
 
 @app.get("/mail/{mail_id}", response_class=HTMLResponse)
-async def detail(request: Request, mail_id: str):
+async def detail(request: Request, mail_id: str) -> Response:
+    """Render the detail page for a specific email."""
     mail = STORE.get(mail_id)
     if not mail:
         raise HTTPException(status_code=404, detail="Mail not found")
@@ -100,7 +115,8 @@ async def detail(request: Request, mail_id: str):
 
 
 @app.get("/mail/{mail_id}/download")
-async def download_raw(mail_id: str):
+async def download_raw(mail_id: str) -> Response:
+    """Download the raw .eml file for a specific email."""
     mail = STORE.get(mail_id)
     if not mail:
         raise HTTPException(status_code=404, detail="Mail not found")
@@ -115,7 +131,8 @@ async def download_raw(mail_id: str):
 
 
 @app.get("/api/mails")
-async def api_list():
+async def api_list() -> Response:
+    """API endpoint to get the list of emails (without raw data)."""
     # Remove raw bytes for JSON response to be lighter
     safe_mails = []
     for m in STORE.mails:
@@ -126,7 +143,8 @@ async def api_list():
 
 
 @app.get("/api/mails/{mail_id}")
-async def api_detail(mail_id: str):
+async def api_detail(mail_id: str) -> Response:
+    """API endpoint to get details of a specific email."""
     mail = STORE.get(mail_id)
     if not mail:
         return JSONResponse({"error": "Not found"}, status_code=404)

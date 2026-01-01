@@ -4,18 +4,34 @@ import time
 import uuid
 from email import policy
 from email.header import decode_header, make_header
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .config import CONFIG
 
 
 # --- In-Memory Data Store ---
 class MailStore:
+    """In-memory store for received emails."""
+
     def __init__(self, max_history: int):
-        self.mails: List[Dict[str, Any]] = []
+        """Initialize the mail store.
+
+        Args:
+            max_history: The maximum number of emails to retain.
+        """
+        self.mails: list[dict[str, Any]] = []
         self.max_history = max_history
 
-    def add(self, raw_data: bytes):
+    def add(self, raw_data: bytes) -> None:
+        """Add a new email to the store.
+
+        Parses the raw email data, creates a record with a unique ID and
+        timestamp, and prepends it to the list. Trims the list if it
+        exceeds max_history.
+
+        Args:
+            raw_data: The raw bytes of the email message.
+        """
         mail_id = str(uuid.uuid4())
         timestamp = time.time()
 
@@ -35,13 +51,29 @@ class MailStore:
         if len(self.mails) > self.max_history:
             self.mails = self.mails[: self.max_history]
 
-    def get(self, mail_id: str) -> Optional[Dict]:
+    def get(self, mail_id: str) -> Optional[dict[str, Any]]:
+        """Retrieve an email by its ID.
+
+        Args:
+            mail_id: The unique identifier of the email.
+
+        Returns:
+            The email dictionary if found, otherwise None.
+        """
         for m in self.mails:
             if m["id"] == mail_id:
                 return m
         return None
 
-    def _parse_email(self, raw_data: bytes) -> Dict:
+    def _parse_email(self, raw_data: bytes) -> dict[str, Any]:
+        """Parse raw email bytes into a structured dictionary.
+
+        Args:
+            raw_data: The raw bytes of the email message.
+
+        Returns:
+            A dictionary containing headers, body_text, and body_html.
+        """
         # Parse bytes to Email Message Object
         msg = email.message_from_bytes(raw_data, policy=policy.default)
 

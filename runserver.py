@@ -1,5 +1,10 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
+"""MailOrca Server Launcher.
+
+This script initializes and runs the MailOrca application,
+starting both the SMTP server and the Web UI.
+"""
 import asyncio
 import logging
 import logging.config
@@ -78,16 +83,21 @@ CONFIG_FILE = "config.json"
 )
 @click.pass_context
 def main(
-    ctx,
-    config,
-    smtp_host,
-    smtp_port,
-    http_host,
-    http_port,
-    max_history,
-    reload,
-    verbose,
-):
+    ctx: click.Context,
+    config: str,
+    smtp_host: str,
+    smtp_port: int,
+    http_host: str,
+    http_port: int,
+    max_history: int,
+    reload: bool,
+    verbose: int,
+) -> None:
+    """Run the MailOrca server with the specified configuration.
+
+    Loads configuration from file and command line arguments, sets up logging,
+    and starts the Uvicorn server.
+    """
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 

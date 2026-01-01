@@ -1,4 +1,8 @@
-"""Configuration module for MailOrca."""
+"""Configuration module for MailOrca.
+
+This module holds the global configuration dictionary and provides
+a function to load settings from an external JSON file.
+"""
 
 import json
 
@@ -45,8 +49,12 @@ CONFIG = {
 }
 
 
-def load_config(config_file):
-    """Load configuration from a JSON file and merge with defaults."""
+def load_config(config_file: str) -> None:
+    """Load configuration from a JSON file and merge with defaults.
+
+    Args:
+        config_file: The path to the configuration JSON file.
+    """
     c = CONFIG
     try:
         with open(config_file, "r", encoding="utf-8") as f:
