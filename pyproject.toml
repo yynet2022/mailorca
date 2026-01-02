@@ -34,6 +34,9 @@ dev = [
     "black",
     "isort",
     "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
 ]
 
 [tool.setuptools.packages.find]
@@ -54,3 +57,7 @@ mypy_path = "src"
 ignore_missing_imports = true
 check_untyped_defs = true
 color_output = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

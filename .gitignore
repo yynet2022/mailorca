@@ -1,5 +1,4 @@
 ENV
-.venv*
 __pycache__/
 *.log
 *.~*

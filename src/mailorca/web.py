@@ -87,9 +87,9 @@ app = FastAPI(title=TITLE, lifespan=lifespan)
 async def index(request: Request) -> Response:
     """Render the main page listing received emails."""
     return templates.TemplateResponse(
-        "list.html",
-        {
-            "request": request,
+        request=request,
+        name="list.html",
+        context={
             "mails": STORE.mails,
             "columns": CONFIG["ui"]["list_columns"],
             "smtp_port": CONFIG["smtp"]["port"],
@@ -105,9 +105,9 @@ async def detail(request: Request, mail_id: str) -> Response:
         raise HTTPException(status_code=404, detail="Mail not found")
 
     return templates.TemplateResponse(
-        "detail.html",
-        {
-            "request": request,
+        request=request,
+        name="detail.html",
+        context={
             "mail": mail,
             "detail_headers": CONFIG["ui"]["detail_headers"],
         },

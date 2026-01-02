@@ -5,3 +5,9 @@ Jinja2==3.1.6
 python-multipart==0.0.20
 click
 # flake8
+# black
+# isort
+# mypy
+# pytest
+# pytest-asyncio
+# httpx

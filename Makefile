@@ -17,3 +17,4 @@ clean:
 
 distclean: clean
 clobber: distclean
+	rm -rf .mypy_cache .pytest_cache
