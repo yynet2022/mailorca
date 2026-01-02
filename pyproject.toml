@@ -9,7 +9,7 @@ description = "A lightweight SMTP server and Web UI for development."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-  { name = "Your Name", email = "your.email@example.com" },
+  {name = "YYNET"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -26,32 +26,27 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/mailorca"
+"Homepage" = "https://github.com/yynet2022/mailorca"
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "black",
+    "isort",
+    "mypy",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.isort]
 profile = "black"
+skip_glob = [".venv*"]
 
 [tool.black]
 line-length = 79
 target-version = ['py39']
 color = false
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | \.venv-mailorca
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
 
 [tool.mypy]
 python_version = "3.9"
