@@ -27,5 +27,14 @@ class MailHandler:
             SMTP response string (e.g., "250 OK").
         """
         logger.debug(f"Mail received from {envelope.mail_from}")
-        STORE.add(envelope.content)
+        content = envelope.content
+        if isinstance(content, str):
+            content = content.encode("utf-8")
+
+        if isinstance(content, bytes):
+            STORE.add(content)
+        else:
+            logger.error(f"Received unexpected content type: {type(content)}")
+            return "500 Internal Server Error"
+
         return "250 OK"

@@ -78,10 +78,13 @@ class MailStore:
         msg = email.message_from_bytes(raw_data, policy=policy.default)
 
         # 1. Parse Headers
-        headers = {}
+        headers: dict[str, Any] = {}
         # Get all header keys to handle duplicates
-        for key in set(msg.keys()):
+        keys = msg.keys() or []
+        for key in set(keys):
             values = msg.get_all(key)
+            if not values:
+                continue
             decoded_values = []
             for v in values:
                 # Helper to decode MIME headers (Subject, Name, etc.)

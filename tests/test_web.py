@@ -4,19 +4,21 @@ def test_read_main(client):
     assert response.status_code == 200
     assert "MailOrca" in response.text
 
+
 def test_api_empty_list(client):
     """Test the API returns empty list initially."""
     response = client.get("/api/mails")
     assert response.status_code == 200
     assert response.json() == []
 
+
 def test_api_list_with_mail(client):
     """Test the API returns added mail."""
     from mailorca.store import STORE
-    
+
     # Manually add a mail
     STORE.add(b"Subject: API Test\r\n\r\nBody")
-    
+
     response = client.get("/api/mails")
     assert response.status_code == 200
     data = response.json()

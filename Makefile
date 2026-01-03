@@ -5,12 +5,13 @@ all:
 	@echo "# python runserver.py"
 
 check:
-	flake8 *.py src/
-	isort --diff *.py src/
-	black --diff *.py src/
-	mypy runserver.py
+	-flake8 *.py src/ tests/
+	-isort --check *.py src/ tests/
+	-black --check *.py src/ tests/ | cat
+	-mypy *.py src/ tests/
 
 test:
+	pytest
 
 clean:
 	find . -type d -name __pycache__ | xargs rm -rf

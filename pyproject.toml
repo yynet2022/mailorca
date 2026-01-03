@@ -39,6 +39,9 @@ dev = [
     "httpx",
 ]
 
+[project.scripts]
+mailorca = "mailorca.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

@@ -1,13 +1,15 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from mailorca.web import app
 from mailorca.store import STORE
+from mailorca.web import app
+
 
 @pytest.fixture
 def client():
     """Create a TestClient for the FastAPI app."""
     return TestClient(app)
+
 
 @pytest.fixture(autouse=True)
 def clean_store():
