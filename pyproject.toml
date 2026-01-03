@@ -45,6 +45,9 @@ mailorca = "mailorca.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+mailorca = ["templates/*.html"]
+
 [tool.isort]
 profile = "black"
 skip_glob = [".venv*"]
