@@ -5,9 +5,12 @@
 This module provides the main entry point for the MailOrca application.
 """
 import asyncio
+import json
 import logging
 import logging.config
+import os
 import sys
+import tempfile
 
 import click
 import uvicorn
@@ -24,6 +27,13 @@ DEFAULT_CONFIG_FILE = "config.json"
     type=click.Path(),
     default=DEFAULT_CONFIG_FILE,
     help="Path to the JSON configuration file.",
+    show_default=True,
+)
+@click.option(
+    "--gen-config",
+    is_flag=True,
+    default=False,
+    help="Output JSON configuration file and exit.",
     show_default=True,
 )
 @click.option(
@@ -80,6 +90,7 @@ DEFAULT_CONFIG_FILE = "config.json"
 def main(
     ctx: click.Context,
     config: str,
+    gen_config: bool,
     smtp_host: str,
     smtp_port: int,
     http_host: str,
@@ -120,11 +131,25 @@ def main(
     if ctx.get_parameter_source("max_history") != p.DEFAULT:
         CONFIG["max_history"] = max_history
 
+    if gen_config:
+        file_handle, file_path = tempfile.mkstemp(
+            suffix=".json", prefix="config_", dir=".", text=True
+        )
+        try:
+            with os.fdopen(file_handle, "w", encoding="utf-8") as f:
+                json.dump(CONFIG, f, ensure_ascii=False, indent=2)
+                f.write("\n")
+            click.echo(f"Generate config file: {file_path}")
+        except Exception as e:
+            click.echo(e)
+        sys.exit(0)
+
     try:
         uvicorn.run(
             "mailorca.web:app",
             host=CONFIG["http"]["host"],
             port=CONFIG["http"]["port"],
+            log_config=CONFIG["logging"],
             reload=reload,
         )
     except Exception as e:

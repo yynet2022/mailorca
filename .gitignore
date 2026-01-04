@@ -1,5 +1,6 @@
 ENV
 __pycache__/
+*.egg-info/
 *.log
 *.~*
 *~

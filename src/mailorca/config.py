@@ -42,7 +42,11 @@ CONFIG: dict[str, Any] = {
         },
         "loggers": {
             "mailorca": {
-                "level": "WARNING",
+                "level": "INFO",
+                "propagate": True,
+            },
+            "uvicorn": {
+                "level": "INFO",
                 "propagate": True,
             },
         },
