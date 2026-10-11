@@ -5,6 +5,7 @@
 This script is a wrapper around `mailorca.cli.main` to facilitate
 running the application during development without installing the package.
 """
+
 import os
 import sys
 

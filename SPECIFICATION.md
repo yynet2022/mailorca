@@ -63,27 +63,25 @@ pip install fastapi uvicorn[standard] aiosmtpd jinja2 python-multipart click
 
 ```python
 {
-    "id": "uuid-v4-string",     # URL参照用の一意なID
+    "id": "uuid-v4-string",  # URL参照用の一意なID
     "timestamp": 1704067200.0,  # 受信時刻 (float, ソート用)
-    
-    "raw": b"...",              # 受信した生のメールデータ (bytes, MIMEエンコードのまま)
-    
-    "parsed": {                 # 表示用にパース・デコード済みのデータ
+    "raw": b"...",  # 受信した生のメールデータ (bytes, MIMEエンコードのまま)
+    "parsed": {  # 表示用にパース・デコード済みのデータ
         "headers": {
-            "Subject": "件名テスト",            # MIMEデコード済み
+            "Subject": "件名テスト",  # MIMEデコード済み
             "From": "sender@example.com",
-            "To": "rcpt1@ex.com, rcpt2@ex.com", # 複数宛先はカンマ区切り文字列
+            "To": "rcpt1@ex.com, rcpt2@ex.com",  # 複数宛先はカンマ区切り文字列
             "Cc": "manager@ex.com",
             "Date": "Wed, 01 Jan 2025...",
-            "Received": [                       # 重複ヘッダはリストで保持
+            "Received": [  # 重複ヘッダはリストで保持
                 "from mail.ex.com...",
-                "from localhost..."
+                "from localhost...",
             ],
-            "X-Custom": "Value"
+            "X-Custom": "Value",
         },
         "body_text": "本文テキスト...",  # text/plain (なければ None)
-        "body_html": "<p>本文...</p>",   # text/html (なければ None)
-    }
+        "body_html": "<p>本文...</p>",  # text/html (なければ None)
+    },
 }
 ```
 

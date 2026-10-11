@@ -4,6 +4,7 @@
 
 This module provides the main entry point for the MailOrca application.
 """
+
 import asyncio
 import json
 import logging
